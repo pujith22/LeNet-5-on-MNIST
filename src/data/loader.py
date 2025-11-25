@@ -15,7 +15,7 @@ def get_data_loaders(batch_size=64, data_dir='./data'):
         transforms.Normalize((0.1307,), (0.3081,)) # MNIST mean and std
     ])
 
-    # Ensure data directory exists
+    # Making sure data_directory exist
     os.makedirs(data_dir, exist_ok=True)
 
     train_dataset = datasets.MNIST(root=data_dir, train=True, download=True, transform=transform)

@@ -2,24 +2,30 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from src.models.lenet import LeNet5
+from src.models.mlp import MLP
 from src.data.loader import get_data_loaders
 import os
 import csv
 import argparse
 
-def train(epochs=10, lr=0.01, momentum=0.9, log_dir='logs/baseline_paper', activation='tanh', optimizer_name='sgd'):
+def train(epochs=10, lr=0.01, momentum=0.9, log_dir='logs/baseline_paper', activation='tanh', optimizer_name='sgd', model_type='lenet', augment=False, train_pct=1.0):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-    print(f"Configuration: Activation={activation}, Optimizer={optimizer_name}, LR={lr}, LogDir={log_dir}")
+    print(f"Configuration: Model={model_type}, Augment={augment}, TrainPct={train_pct}, Activation={activation}, Optimizer={optimizer_name}, LR={lr}, LogDir={log_dir}")
 
     # Create log directory
     os.makedirs(log_dir, exist_ok=True)
     
     # Data Loaders
-    train_loader, test_loader = get_data_loaders()
+    train_loader, test_loader = get_data_loaders(augment=augment, train_pct=train_pct)
 
     # Model
-    model = LeNet5(activation=activation).to(device)
+    if model_type.lower() == 'lenet':
+        model = LeNet5(activation=activation).to(device)
+    elif model_type.lower() == 'mlp':
+        model = MLP().to(device)
+    else:
+        raise ValueError(f"Unsupported model: {model_type}")
 
     # Optimizer
     if optimizer_name.lower() == 'sgd':
@@ -90,7 +96,10 @@ if __name__ == "__main__":
     parser.add_argument('--log_dir', type=str, default='logs/baseline_paper', help='Directory for logs')
     parser.add_argument('--activation', type=str, default='tanh', choices=['tanh', 'relu'], help='Activation function')
     parser.add_argument('--optimizer', type=str, default='sgd', choices=['sgd', 'adam'], help='Optimizer')
+    parser.add_argument('--model', type=str, default='lenet', choices=['lenet', 'mlp'], help='Model type')
+    parser.add_argument('--augment', action='store_true', help='Enable data augmentation')
+    parser.add_argument('--train_pct', type=float, default=1.0, help='Percentage of training data to use')
 
     args = parser.parse_args()
 
-    train(epochs=args.epochs, lr=args.lr, momentum=args.momentum, log_dir=args.log_dir, activation=args.activation, optimizer_name=args.optimizer)
+    train(epochs=args.epochs, lr=args.lr, momentum=args.momentum, log_dir=args.log_dir, activation=args.activation, optimizer_name=args.optimizer, model_type=args.model, augment=args.augment, train_pct=args.train_pct)

@@ -2,14 +2,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-# Define paths to logs
+# Path to logs
 log_paths = {
     'Baseline (SGD, Tanh, 0.01)': 'logs/baseline_paper/training_log.csv',
     'SGD High LR (0.1)': 'logs/sgd_high_lr/training_log.csv',
     'Modern (Adam, ReLU, 0.001)': 'logs/modern_adam_relu/training_log.csv'
 }
 
-# Load data
+# Loading data
 dfs = {}
 for name, path in log_paths.items():
     if os.path.exists(path):
